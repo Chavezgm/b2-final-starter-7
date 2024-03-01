@@ -110,8 +110,7 @@ RSpec.describe "Merchant Bulk Discounts Index" do
         # save_and_open_page
         # Then next to each bulk discount I see a button to delete it
         click_button("Delete Bulk Discount")
-        # When I click this button
-        
+        # When I click this button 
       end
       
       expect(current_path).to eq(merchant_bulk_discounts_path(@merchant1))
@@ -121,6 +120,18 @@ RSpec.describe "Merchant Bulk Discounts Index" do
 
       expect(page).to_not have_content('Percentage Discount: 5 Quantity Threshold: 10')
       # And I no longer see the discount listed
+    end
+  end
+
+  describe 'US 4 ' do
+    it 'shows bulk discount attributes' do
+      
+      visit merchant_bulk_discount_path(@merchant1, @bulk_discount_merchant1_1)
+      # When I visit my bulk discount show page
+
+      expect(page).to have_content('Percentage Discount: 10')
+      expect(page).to have_content('Quantity Threshold: 5')
+      # Then I see the bulk discount's quantity threshold and percentage discount
     end
   end
 
