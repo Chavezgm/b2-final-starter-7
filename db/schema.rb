@@ -15,7 +15,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_29_230701) do
   enable_extension "plpgsql"
 
   create_table "bulk_discounts", force: :cascade do |t|
-    t.integer "percentage_discount"
+    t.float "percentage_discount"
     t.integer "quantity_threshold"
     t.bigint "merchant_id", null: false
     t.datetime "created_at", null: false
