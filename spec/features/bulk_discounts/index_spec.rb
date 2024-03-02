@@ -29,8 +29,8 @@ RSpec.describe "Merchant Bulk Discounts Index" do
       # Then I am taken to my bulk discounts index page
       # save_and_open_page
       expect(page).to have_content('Merchant Discounts:')
-      expect(page).to have_content('Percentage Discount: 10 Quantity Threshold: 5')
-      expect(page).to have_content('Percentage Discount: 20 Quantity Threshold: 10')
+      expect(page).to have_content('Percentage Discount: 10.0 Quantity Threshold: 5')
+      expect(page).to have_content('Percentage Discount: 20.0 Quantity Threshold: 10')
       # Where I see all of my bulk discounts including their
       # percentage discount and quantity thresholds
       
@@ -69,7 +69,7 @@ RSpec.describe "Merchant Bulk Discounts Index" do
 
       expect(page).to have_content('Bulk discount created')
 
-      expect(page).to have_content('Percentage Discount: 15 Quantity Threshold: 10')
+      expect(page).to have_content('Percentage Discount: 15.0 Quantity Threshold: 10')
       # And I see my new bulk discount listed
     end
 

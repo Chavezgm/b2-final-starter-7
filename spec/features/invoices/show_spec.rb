@@ -138,5 +138,45 @@ RSpec.describe "invoices show" do
       # And I see the total discounted revenue for my merchant from this invoice which includes bulk discounts in the calculation
     end
   end
-  
+
+  describe 'US 7' do
+    it 'each invoice item I see a link to the show page for the bulk discount that was applied' do
+      merchant1 = Merchant.create!(name: "Hair Care")
+
+      # Create items for merchant 1
+      item_1 = Item.create!(name: "Shampoo", description: "This washes your hair", unit_price: 10, merchant_id: merchant1.id)
+      item_2 = Item.create!(name: "Conditioner", description: "This makes your hair shiny", unit_price: 8, merchant_id: merchant1.id)
+    
+      # Create bulk discounts for merchant 1
+      bulk_discount_1 = BulkDiscount.create!(percentage_discount: 20, quantity_threshold: 10, merchant_id: merchant1.id)
+      bulk_discount_2 = BulkDiscount.create!(percentage_discount: 15, quantity_threshold: 15, merchant_id: merchant1.id)
+    
+      # Create customers
+      customer = Customer.create!(first_name: "Joey", last_name: "Smith")
+    
+      # Create invoice with invoice items (some with bulk discounts)
+      invoice = Invoice.create!(customer_id: customer.id, status: 2)
+      invoice_item_1 = InvoiceItem.create!(invoice_id: invoice.id, item_id: item_1.id, quantity: 12, unit_price: 10, status: 2) #120 shampoo meets quantity threshold for bulk discount 1 which the price is 8 dollors now and the discount total is $96 for this item 
+      invoice_item_2 = InvoiceItem.create!(invoice_id: invoice.id, item_id: item_2.id, quantity: 1, unit_price: 8, status: 2) #120 conditioner meets quantity threshold for bulk discount 2 the price of the item is now 6.8 bc 15% of 8 is 1.2 then 8-1.20 = $6.8 15 *6.8 = 102
+      #96 + 102                                                                                                                          
+      # Create transactions for the invoices
+      transaction1 = Transaction.create!(credit_card_number: 203942, result: 1, invoice_id: invoice.id)
+      
+      # When I visit my merchant invoice show page
+      visit merchant_invoice_path(merchant1, invoice)
+
+      # Next to each invoice item I see a link to the show page for the bulk discount that was applied (if any)
+      within("#the-status-#{invoice_item_2.id}") do
+        expect(page).to_not have_link("#{bulk_discount_1.percentage_discount}% off applied")
+        expect(page).to_not have_link("#{bulk_discount_2.percentage_discount}% off applied")
+      end
+
+      save_and_open_page
+      within("#the-status-#{invoice_item_1.id}") do
+        expect(page).to have_link("#{bulk_discount_1.percentage_discount}% off applied")
+        click_link("#{bulk_discount_1.percentage_discount}% off applied")
+      end
+      expect(current_path).to eq(merchant_bulk_discount_path(merchant1, bulk_discount_1))
+    end
+  end
 end

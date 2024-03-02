@@ -30,7 +30,7 @@ RSpec.describe "Bulk Discount show" do
       # save_and_open_page
       # expect(page).to have_content(@bulk_discount_merchant1_1.percentage_discount)
       # expect(page).to have_content('Quantity Threshold: 5')
-      expect(page).to have_field('Percentage discount', with: '10')
+      expect(page).to have_field('Percentage discount', with: '10.0')
       expect(page).to have_field('Quantity threshold', with: '5')
 
       # And I see that the discounts current attributes are pre-poluated in the form
