@@ -4,18 +4,23 @@ describe "Admin Invoices Index Page" do
   before :each do
     @m1 = Merchant.create!(name: "Merchant 1")
 
+    @bulk_discount = BulkDiscount.create!(percentage_discount: 15,quantity_threshold: 10, merchant_id: @m1.id)
+
     @c1 = Customer.create!(first_name: "Yo", last_name: "Yoz", address: "123 Heyyo", city: "Whoville", state: "CO", zip: 12345)
     @c2 = Customer.create!(first_name: "Hey", last_name: "Heyz")
 
-    @i1 = Invoice.create!(customer_id: @c1.id, status: 2, created_at: "2012-03-25 09:54:09")
+    @i1 = Invoice.create!(customer_id: @c1.id, status: 2, created_at: "2012-03-25 09:54:09") #has ii1 ii2
     @i2 = Invoice.create!(customer_id: @c2.id, status: 1, created_at: "2012-03-25 09:30:09")
 
-    @item_1 = Item.create!(name: "test", description: "lalala", unit_price: 6, merchant_id: @m1.id)
-    @item_2 = Item.create!(name: "rest", description: "dont test me", unit_price: 12, merchant_id: @m1.id)
+    @item_1 = Item.create!(name: "test", description: "lalala", unit_price: 6, merchant_id: @m1.id) #This does not have the discount
+    @item_2 = Item.create!(name: "rest", description: "dont test me", unit_price: 12, merchant_id: @m1.id)#This has the discount
 
-    @ii_1 = InvoiceItem.create!(invoice_id: @i1.id, item_id: @item_1.id, quantity: 12, unit_price: 2, status: 0)
-    @ii_2 = InvoiceItem.create!(invoice_id: @i1.id, item_id: @item_2.id, quantity: 6, unit_price: 1, status: 1)
-    @ii_3 = InvoiceItem.create!(invoice_id: @i2.id, item_id: @item_2.id, quantity: 87, unit_price: 12, status: 2)
+    @ii_1 = InvoiceItem.create!(invoice_id: @i1.id, item_id: @item_1.id, quantity: 12, unit_price: 2, status: 0) #this is pending $24 for the discount revenue  only invoice item 1 meets it because it has more then 10 quantity - $2 * (1 - 20%) = $2 * 0.8 = $1.6 * 12 =19.20
+    @ii_2 = InvoiceItem.create!(invoice_id: @i1.id, item_id: @item_2.id, quantity: 6, unit_price: 1, status: 1)  #this is pakaged $6 =30 for the total revenue 
+    @ii_3 = InvoiceItem.create!(invoice_id: @i2.id, item_id: @item_2.id, quantity: 87, unit_price: 12, status: 2) #this is shipped
+
+    # transaction1 = Transaction.create!(credit_card_number: 203942, result: 1, invoice_id: invoice.id)
+
 
     visit admin_invoice_path(@i1)
   end
@@ -67,6 +72,20 @@ describe "Admin Invoices Index Page" do
 
       expect(current_path).to eq(admin_invoice_path(@i1))
       expect(@i1.status).to eq("completed")
+    end
+  end
+
+  describe 'US 8' do
+    it ' Total Revenue and Discounted Revenue' do
+
+      # When I visit an admin invoice show page
+      within "#total-rev-#{@i1.id}" do 
+      save_and_open_page
+        expect(page).to have_content('Total Revenue: $30.00')
+        # Then I see the total revenue from this invoice (not including discounts)
+        expect(page).to have_content("Total Discount Revenue: $26.40")
+        # And I see the total discounted revenue from this invoice which includes bulk discounts in the calculation
+      end
     end
   end
 end

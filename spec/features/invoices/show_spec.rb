@@ -121,7 +121,7 @@ RSpec.describe "invoices show" do
       invoice = Invoice.create!(customer_id: customer.id, status: 2)
       invoice_item_1 = InvoiceItem.create!(invoice_id: invoice.id, item_id: item_1.id, quantity: 12, unit_price: 10, status: 2) #120 shampoo meets quantity threshold for bulk discount 1 which the price is 8 dollors now and the discount total is $96 for this item 
       invoice_item_2 = InvoiceItem.create!(invoice_id: invoice.id, item_id: item_2.id, quantity: 1, unit_price: 8, status: 2) #120 conditioner meets quantity threshold for bulk discount 2 the price of the item is now 6.8 bc 15% of 8 is 1.2 then 8-1.20 = $6.8 15 *6.8 = 102
-      #96 + 102                                                                                                                          
+                                                                                                                                
       # Create transactions for the invoices
       transaction1 = Transaction.create!(credit_card_number: 203942, result: 1, invoice_id: invoice.id)
       # As a merchant
@@ -129,7 +129,7 @@ RSpec.describe "invoices show" do
       visit merchant_invoice_path(merchant1,invoice)
       # When I visit my merchant invoice show page
 
-      save_and_open_page
+      # save_and_open_page
       expect(page).to have_content('Total Revenue: 128.0')
       # Then I see the total revenue for my merchant from this invoice (not including discounts)
       
