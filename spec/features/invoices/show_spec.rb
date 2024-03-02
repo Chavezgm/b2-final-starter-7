@@ -15,6 +15,7 @@ RSpec.describe "invoices show" do
     @item_5 = Item.create!(name: "Bracelet", description: "Wrist bling", unit_price: 200, merchant_id: @merchant2.id)
     @item_6 = Item.create!(name: "Necklace", description: "Neck bling", unit_price: 300, merchant_id: @merchant2.id)
 
+
     @customer_1 = Customer.create!(first_name: "Joey", last_name: "Smith")
     @customer_2 = Customer.create!(first_name: "Cecilia", last_name: "Jones")
     @customer_3 = Customer.create!(first_name: "Mariah", last_name: "Carrey")
@@ -25,7 +26,7 @@ RSpec.describe "invoices show" do
     @invoice_1 = Invoice.create!(customer_id: @customer_1.id, status: 2, created_at: "2012-03-27 14:54:09")
     @invoice_2 = Invoice.create!(customer_id: @customer_1.id, status: 2, created_at: "2012-03-28 14:54:09")
     @invoice_3 = Invoice.create!(customer_id: @customer_2.id, status: 2)
-    @invoice_4 = Invoice.create!(customer_id: @customer_3.id, status: 2)
+    @invoice_4 = Invoice.create!(customer_id: @customer_3.id, status: 2) #status 2 = completed
     @invoice_5 = Invoice.create!(customer_id: @customer_4.id, status: 2)
     @invoice_6 = Invoice.create!(customer_id: @customer_5.id, status: 2)
     @invoice_7 = Invoice.create!(customer_id: @customer_6.id, status: 2)
@@ -34,7 +35,7 @@ RSpec.describe "invoices show" do
 
     @ii_1 = InvoiceItem.create!(invoice_id: @invoice_1.id, item_id: @item_1.id, quantity: 9, unit_price: 10, status: 2)
     @ii_2 = InvoiceItem.create!(invoice_id: @invoice_2.id, item_id: @item_1.id, quantity: 1, unit_price: 10, status: 2)
-    @ii_3 = InvoiceItem.create!(invoice_id: @invoice_3.id, item_id: @item_2.id, quantity: 2, unit_price: 8, status: 2)
+    @ii_3 = InvoiceItem.create!(invoice_id: @invoice_3.id, item_id: @item_2.id, quantity: 2, unit_price: 8, status: 2) #16.0
     @ii_4 = InvoiceItem.create!(invoice_id: @invoice_4.id, item_id: @item_3.id, quantity: 3, unit_price: 5, status: 1)
     @ii_6 = InvoiceItem.create!(invoice_id: @invoice_5.id, item_id: @item_4.id, quantity: 1, unit_price: 1, status: 1)
     @ii_7 = InvoiceItem.create!(invoice_id: @invoice_6.id, item_id: @item_7.id, quantity: 1, unit_price: 3, status: 1)
@@ -100,4 +101,42 @@ RSpec.describe "invoices show" do
     end
   end
 
+  describe 'US 6' do
+    it 'displays total revenue for my merchant from an invoice and also see total discounted revenue ' do
+
+      merchant1 = Merchant.create!(name: "Hair Care")
+
+      # Create items for merchant 1
+      item_1 = Item.create!(name: "Shampoo", description: "This washes your hair", unit_price: 10, merchant_id: merchant1.id)
+      item_2 = Item.create!(name: "Conditioner", description: "This makes your hair shiny", unit_price: 8, merchant_id: merchant1.id)
+    
+      # Create bulk discounts for merchant 1
+      bulk_discount_1 = BulkDiscount.create!(percentage_discount: 20, quantity_threshold: 10, merchant_id: merchant1.id)
+      bulk_discount_2 = BulkDiscount.create!(percentage_discount: 15, quantity_threshold: 15, merchant_id: merchant1.id)
+    
+      # Create customers
+      customer = Customer.create!(first_name: "Joey", last_name: "Smith")
+    
+      # Create invoice with invoice items (some with bulk discounts)
+      invoice = Invoice.create!(customer_id: customer.id, status: 2)
+      invoice_item_1 = InvoiceItem.create!(invoice_id: invoice.id, item_id: item_1.id, quantity: 12, unit_price: 10, status: 2) #120 shampoo meets quantity threshold for bulk discount 1 which the price is 8 dollors now and the discount total is $96 for this item 
+      invoice_item_2 = InvoiceItem.create!(invoice_id: invoice.id, item_id: item_2.id, quantity: 1, unit_price: 8, status: 2) #120 conditioner meets quantity threshold for bulk discount 2 the price of the item is now 6.8 bc 15% of 8 is 1.2 then 8-1.20 = $6.8 15 *6.8 = 102
+      #96 + 102                                                                                                                          
+      # Create transactions for the invoices
+      transaction1 = Transaction.create!(credit_card_number: 203942, result: 1, invoice_id: invoice.id)
+      # As a merchant
+
+      visit merchant_invoice_path(merchant1,invoice)
+      # When I visit my merchant invoice show page
+
+      save_and_open_page
+      expect(page).to have_content('Total Revenue: 128.0')
+      # Then I see the total revenue for my merchant from this invoice (not including discounts)
+      
+      save_and_open_page
+      expect(page).to have_content('Total Discounted Revenue: 104.0')
+      # And I see the total discounted revenue for my merchant from this invoice which includes bulk discounts in the calculation
+    end
+  end
+  
 end
