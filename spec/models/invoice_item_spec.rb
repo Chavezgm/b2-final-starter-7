@@ -38,5 +38,23 @@ RSpec.describe InvoiceItem, type: :model do
     it 'incomplete_invoices' do
       expect(InvoiceItem.incomplete_invoices).to eq([@i1, @i3])
     end
+
+    it 'applied_discount' do
+      merchant = Merchant.create!(name: 'Hair Care')
+      bulk_discount = merchant.bulk_discounts.create!(percentage_discount: 20.0, quantity_threshold: 10)
+      invoice_item = InvoiceItem.new(quantity: 10)
+
+      discount_details = invoice_item.applied_discount(BulkDiscount)
+
+      expect(discount_details).to eq([20.0, bulk_discount.id])
+    end
+
+    it 'returns true if any bulk discount applies to the quantity' do
+      merchant = Merchant.create!(name: 'Hair Care')
+      BulkDiscount.create!(percentage_discount: 20.0, quantity_threshold: 10, merchant: merchant)
+      invoice_item = InvoiceItem.new(quantity: 12)
+
+      expect(invoice_item.discount_applies(BulkDiscount)).to eq(true)
+    end
   end
 end

@@ -12,7 +12,7 @@
 
   <p> Created on: <%= @invoice.created_at.strftime("%A, %B %-d, %Y") %></p>
   <p>Total Revenue: <%= @invoice.total_revenue %></p>
-
+    <p>Total Discounted Revenue: <%= @invoice.total_discounted_revenue %></p>
 
   <h4>Customer:</h4>
     <%= @customer.first_name %> <%= @customer.last_name %><br>
@@ -26,6 +26,7 @@
         <th class="th1">Quantity</th>
         <th class="th1">Unit Price</th>
         <th class="th1">Status</th>
+        <th class="th1">Link to Discount</th>
       </tr>
     </thead>
 
@@ -34,6 +35,7 @@
         <section id="the-status-<%= i.id %>">
           <tr class="tr">
             <td style="text-align:center"><%= i.item.name %></td>
+            <td style="text-align:center"><%= i.item.name %></td>
             <td style="text-align:center"><%= i.quantity %></td>
             <td style="text-align:center">$<%= i.unit_price %></td>
             <td style="text-align:center">
@@ -41,11 +43,18 @@
                 <%= f.select :status, Invoice.statuses.keys, selected: "#{@invoice.status}" %>
                 <%= f.submit 'Update Invoice' %>
               <% end %>
-              </td>
+            </td>
+            <% has_discounts = !i.item.merchant.bulk_discounts.empty? %> <! This line checks if the current invoice item (i) has any associated bulk discounts. It sets has_discounts to true >
+            <% applies =  i.discount_applies(i.item.merchant.bulk_discounts) %> <! This method checks if any bulk discounts apply to the current quantity of the item,  by calling the discount_applies>
+            <% discount =  i.applied_discount(i.item.merchant.bulk_discounts)%> <!This method searches among the provided bulk discounts to find the one that applies to the current quantity of the item.>
+
+            <! if both conditions are met it will render the table containing the link to the show page of the bulk_discount that applies to the item>
+            <% if has_discounts && applies %> <! verifies that the item has associated bulk discounts and that at least one of them applies to the current quantity of the item>
+              <td style="text-align:center">$<%= link_to "#{discount[0]}% off applied", merchant_bulk_discount_path(i.item.merchant, discount[1]), method: :get %></td>
+            <% end %>
           </tr>
         </section>
       <% end %>
     </tbody>
   </table>
-
 </body>

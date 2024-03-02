@@ -12,8 +12,11 @@
         <%= f.submit 'Update Invoice' %>
     </section>
       <% end %>
-  <p>Created on: <%= @invoice.created_at.strftime("%A, %B %d, %Y") %>
-  <p>Total Revenue: <%= number_to_currency(@invoice.total_revenue) %>
+      <section id="total-rev-<%= @invoice.id %>"> <! Add this section to make sure I'm getting back what I want>
+        <p>Created on: <%= @invoice.created_at.strftime("%A, %B %d, %Y") %>
+        <p>Total Revenue: <%= number_to_currency(@invoice.total_revenue) %>
+        <p>Total Discount Revenue: <%= number_to_currency(@invoice.total_discounted_revenue) %>
+      </section>
 
   <h4>Customer:</h4>
     <%= @invoice.customer.first_name %> <%= @invoice.customer.last_name %><br>
