@@ -19,21 +19,18 @@ class Invoice < ApplicationRecord
     total = 0
     invoice_items.each do |invoice_item|
       discount = invoice_item.item.merchant.bulk_discounts
-      .where('quantity_threshold <= ?', invoice_item.quantity)
-      .order(percentage_discount: :desc).first
-      
+        .where('quantity_threshold <= ?', invoice_item.quantity)
+        .order(percentage_discount: :desc)
+        .first
+
       if discount 
-        total += invoice_item.unit_price * invoice_item.quantity * (1 - discount.percentage_discount.to_f / 100.0)
+        total += invoice_item.unit_price * invoice_item.quantity * (1 - discount.percentage_discount / 100.0)
       else 
         total += invoice_item.unit_price * invoice_item.quantity
       end
-      # require 'pry'; binding.pry
     end
     total
-    # require 'pry'; binding.pry
   end
 
-
-
-
+  
 end
