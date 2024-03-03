@@ -35,9 +35,9 @@
         <section id="the-status-<%= i.id %>">
           <tr class="tr">
             <td style="text-align:center"><%= i.item.name %></td>
-            <td style="text-align:center"><%= i.item.quantity %></td>
             <td style="text-align:center"><%= i.quantity %></td>
             <td style="text-align:center">$<%= i.unit_price %></td>
+            <td style="text-align:center"></td>
             <td style="text-align:center">
               <%= form_with model: @invoice, url: merchant_invoice_path(@merchant, @invoice), method: :patch, local: true do |f| %>
                 <%= f.select :status, Invoice.statuses.keys, selected: "#{@invoice.status}" %>
